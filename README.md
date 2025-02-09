@@ -2,7 +2,7 @@
 ## model_dataset.py
 Code for training different models with natural samples
 ## model_dataset_adv.py
-Use PGD attack method to generate codes for adversarial samples under different models and different data sets
+Use PGD attack method to generate dversarial samples under different models and different data sets
 ## model_dataset_adv_train.py
 Code for adversarial training using adversarial examples
 ## PGD_attack.py RFGSM.py Square_Attack.py
