@@ -1,4 +1,4 @@
-# RDI
+# RDI: A adversarial robustness evaluation metric for deep neural networks based on model statistical features
 ## model_dataset.py
 Code for training different models with natural samples
 ## model_dataset_adv.py
