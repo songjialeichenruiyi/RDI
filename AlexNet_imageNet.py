@@ -44,7 +44,7 @@ dataset_path = "./boundary_robustness/data/tiny-imagenet-200"
 train_dir = os.path.join(dataset_path, 'train')
 val_dir = os.path.join(dataset_path, 'val')
 
-# Custom validation set dataset class
+# Custom validation dataset class
 class TinyImageNetValDataset(Dataset):
     def __init__(self, val_dir, transform=None):
         self.val_dir = val_dir
