@@ -6,40 +6,35 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision
 import torchvision.transforms as transforms
 from torchvision import datasets, models
-# import ROBY
 import RDI
 
-# 检查是否有可用的GPU
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(torch.cuda.is_available())
 
-# 加载 torchvision.models 中的 AlexNet 模型，并修改输入层以适应 CIFAR-100 数据集
+# Load the AlexNet model in torchvision.models and modify the input layer to fit the CIFAR-100 dataset
 class ModifiedAlexNet(nn.Module):
-    def __init__(self, num_classes=100):  # 将类别数量改为 100
+    def __init__(self, num_classes=100):
         super(ModifiedAlexNet, self).__init__()
         self.model = models.alexnet(weights = None)
-        # 修改第一层卷积来适应 CIFAR-100 小尺寸输入
         # self.model.features[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
-        # 修改最大池化层，减少池化窗口的大小和步幅
         # self.model.features[2] = nn.Identity()
-        self.model.classifier[6] = nn.Linear(4096, num_classes)  # 修改输出层以适应 CIFAR-100 的类别数量
+        self.model.classifier[6] = nn.Linear(4096, num_classes)
 
     def forward(self, x):
         return self.model(x)
     
     
-# 1. 加载训练好的模型
 model = ModifiedAlexNet().to(device)
 model_save_path = 'boundary_robustness/models/cifar100/AlexNet_cifar100.pth'
-# 加载模型参数
 model.load_state_dict(torch.load(model_save_path))
-model.eval()  # 切换到评估模式
+model.eval()
 
-# 2. 自定义数据集类，用于加载对抗样本
+# Custom dataset class for loading adversarial samples
 class AdversarialDataset(Dataset):
     def __init__(self, adv_data_file, label_file, transform=None):
-        self.adv_data = np.load(adv_data_file)  # 加载对抗样本
-        self.labels = np.load(label_file)       # 加载标签
+        self.adv_data = np.load(adv_data_file)
+        self.labels = np.load(label_file)
         self.transform = transform
 
     def __len__(self):
@@ -54,31 +49,29 @@ class AdversarialDataset(Dataset):
         
         return image, label
 
-# 3. 数据加载部分
+
 transform = transforms.Compose([
-    # transforms.RandomCrop(32, padding=4),  # 随机裁剪到 32x32，并在边界填充 4 像素
-    # transforms.RandomHorizontalFlip(),     # 随机水平翻转
-    # transforms.RandomRotation(15),         # 随机旋转 [-15, 15] 度
-    # transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),  # 调整亮度、对比度、饱和度和色调
+    # transforms.RandomCrop(32, padding=4),  
+    # transforms.RandomHorizontalFlip(),     
+    # transforms.RandomRotation(15),
+    # transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), 
     transforms.Resize((224, 224)),
-    transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))  # CIFAR-100 的均值和标准差
+    transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))
 ])
 
-# 3. 数据加载部分
 transform3 = transforms.Compose([
     transforms.Resize((224, 224)), 
-    transforms.RandomCrop(224, padding=4),  # 随机裁剪到 32x32，并在边界填充 4 像素
-    transforms.RandomHorizontalFlip(),     # 随机水平翻转
-    transforms.RandomRotation(15),         # 随机旋转 [-15, 15] 度
-    # transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),  # 调整亮度、对比度、饱和度和色调
+    transforms.RandomCrop(224, padding=4), 
+    transforms.RandomHorizontalFlip(),     
+    transforms.RandomRotation(15),        
     transforms.ToTensor(),
-    transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))  # CIFAR-100 的均值和标准差
+    transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762)) 
 ])
 
 transform2 = transforms.Compose([
     transforms.Resize((224, 224)), 
     transforms.ToTensor(),
-    transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))  # CIFAR-100 的均值和标准差
+    transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))
 ])
 
 # 创建对抗数据集
