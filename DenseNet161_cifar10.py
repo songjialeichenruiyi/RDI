@@ -121,6 +121,6 @@ PGD_attack.test_with_pgd_attack(loaded_model, test_loader, 0.1, 0.0025, 10)
 # print("Evaluating under RFGSM attack...")
 # RFGSM.test_with_RFGSM_attack(loaded_model, test_loader, 0.1, 0.0025, 10)
 
-# Testing model performance under Square attack attack
+# Testing model performance under Square attack
 # print("Evaluating under Square attack...")
 # Square_Attack.test_with_square_attack(loaded_model, test_loader, n_queries=200, eps=0.1)
