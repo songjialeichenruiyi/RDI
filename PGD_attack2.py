@@ -4,63 +4,59 @@ import torch.optim as optim
 import numpy as np
 
 
-# 检查是否有可用的GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# 定义L∞ PGD攻击类
+# Defining the L∞ PGD attack class
 class LinfPGD:
     def __init__(self, model, epsilon, num_steps, step_size, random_start):
         """Attack parameter initialization. The attack performs k steps of
            size a, while always staying within epsilon from the initial
            point."""
         self.model = model
-        self.epsilon = epsilon  # 扰动范围
-        self.num_steps = num_steps  # 攻击步数
-        self.step_size = step_size  # 每一步步长
-        self.random_start = random_start  # 是否进行随机初始化
-        self.loss_fn = nn.CrossEntropyLoss()  # 损失函数和tensorflow版相同
+        self.epsilon = epsilon  
+        self.num_steps = num_steps  
+        self.step_size = step_size 
+        self.random_start = random_start  
+        self.loss_fn = nn.CrossEntropyLoss() 
 
     def perturb(self, x_nat, y):
         """
         Given a set of examples (x_nat, y), returns a set of adversarial
         examples within epsilon of x_nat in l_infinity norm.
         """
-        x = x_nat.clone().detach().to(torch.device('cuda'))  # 确保x在CUDA上
+        x = x_nat.clone().detach().to(torch.device('cuda')) 
         y = y.to(torch.device('cuda'))
 
         if self.random_start:
-            # 随机初始化，在 epsilon 范围内加扰动
+            # Random initialization with perturbations in the epsilon range
             x = x + torch.empty_like(x).uniform_(-self.epsilon, self.epsilon)
-            x = torch.clamp(x, 0, 1)  # 确保图片像素值依然在 [0, 1] 范围内
+            x = torch.clamp(x, 0, 1)
 
-        # 进行多步迭代的PGD攻击
+        # Perform multi-step iterative PGD attacks
         for i in range(self.num_steps):
-            # 每次迭代都需要让 x 可计算梯度
             x.requires_grad_()
 
-            # 计算模型输出
             outputs = self.model(x)
             loss = self.loss_fn(outputs, y)
 
-            # 清空之前的梯度，进行反向传播
+            # Empty the previous gradient for backpropagation
             self.model.zero_grad()
             loss.backward()
 
-            # 获取梯度信息，并更新x
+            # Get the gradient information and update x
             grad = x.grad.data.sign()
             x = x + self.step_size * grad
 
-            # 将扰动限制在无穷范数范围内，并确保加上扰动后的像素值合法
+            # Limit the perturbation to an infinite number of paradigms and make sure that the pixel values after adding the perturbation are legal
             x = torch.clamp(x, x_nat - self.epsilon, x_nat + self.epsilon)
-            x = torch.clamp(x, 0, 1)  # 再次确保像素值在 [0, 1] 范围
+            x = torch.clamp(x, 0, 1)
 
-            # Detach x，防止计算图一直累积
+            # Detach x，Prevents the calculation graph from accumulating all the time
             x = x.detach()
 
-        return x  # 返回对抗样本
+        return x
 
     
 
-# 使用PGD攻击测试模型的性能
 def test_with_pgd_attack(model, test_loader, epsilon=0.3, alpha=0.01, iters=40):
     attack = LinfPGD(model = model,
                          epsilon = 0.3,
@@ -73,7 +69,7 @@ def test_with_pgd_attack(model, test_loader, epsilon=0.3, alpha=0.01, iters=40):
 
     for images, labels in test_loader:
         images, labels = images.to(device), labels.to(device)
-        adv_images = attack.perturb(images, labels)  # 生成对抗样本
+        adv_images = attack.perturb(images, labels)
         outputs = model(adv_images)
         _, predicted = torch.max(outputs, 1)
         # print(predicted)
@@ -84,7 +80,6 @@ def test_with_pgd_attack(model, test_loader, epsilon=0.3, alpha=0.01, iters=40):
     print(f'Accuracy under PGD attack: {accuracy:.2f}%')
 
 
-# 使用PGD攻击测试模型的性能
 def save_pgd_attack(model, test_loader, epsilon=0.3, alpha=0.01, iters=40):
     attack = LinfPGD(model = model,
                          epsilon = 0.3,
