@@ -40,7 +40,7 @@ transform_test = transforms.Compose([
 ])
 
 
-dataset_path = "./boundary_robustness/data/tiny-imagenet-200"
+dataset_path = "./data/tiny-imagenet-200"
 train_dir = os.path.join(dataset_path, 'train')
 val_dir = os.path.join(dataset_path, 'val')
 
