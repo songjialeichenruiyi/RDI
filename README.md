@@ -67,8 +67,7 @@ test_dataset = torchvision.datasets.CIFAR100(root='./data', train=False, downloa
 Download the ImageNet dataset from the following link: [Tiny-ImageNet](http://cs231n.stanford.edu/tiny-imagenet-200.zip)
 
 ## Explanation of the functionality of the different codes
-
-## model_dataset.py
+### model_dataset.py ()
 Code for training different models with natural samples.
 ## model_dataset_adv.py
 Use PGD attack method to generate dversarial samples under different models and different data sets.
