@@ -30,8 +30,8 @@ transform = transforms.Compose([
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.2435, 0.2616))
 ])
 
-train_dataset = datasets.CIFAR10(root='./boundary_robustness/data', train=True, download=True, transform=transform)
-test_dataset = datasets.CIFAR10(root='./boundary_robustness/data', train=False, download=True, transform=transform)
+train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
 
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=1000, shuffle=False)
@@ -87,7 +87,7 @@ def test(model, test_loader):
 # num_epochs = 15
 # train(model, train_loader, criterion, optimizer, num_epochs)
 
-model_save_path = 'boundary_robustness/models/cifar10/AlexNet_cifar10.pth'
+model_save_path = './models/cifar10/AlexNet_cifar10.pth'
 # torch.save(model.state_dict(), model_save_path)
 # print(f'Model saved to {model_save_path}')
 
