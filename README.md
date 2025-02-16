@@ -8,7 +8,10 @@ RDI is a adversarial robustness evaluation metric for deep neural networks based
   - Torchvision 0.14.0
 ## Installation
 - **Python Setup**: Ensure that you have the correct version of Python installed. If not, download and install it from [python390](https://www.python.org/downloads/release/python-390/)
-- 
+- **Library Installation**: <br>
+```bash
+pip install torch==1.13.0 torchvision==0.14.0
+```
 
 ## model_dataset.py
 Code for training different models with natural samples.
