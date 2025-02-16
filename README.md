@@ -18,9 +18,16 @@ Download and prepare the MNIST dataset:
 ```python
 import torchvision
 import torchvision.transforms as transforms
-test_dataset = torchvision.datasets.MNIST(root='./data/', download=True, train=False, transform=transforms.ToTensor())
-
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.1307,), (0.3081,))
+])
+train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 ```
+### FashionMNIST
+Download and prepare the FashionMNIST dataset:
+
 ## model_dataset.py
 Code for training different models with natural samples.
 ## model_dataset_adv.py
