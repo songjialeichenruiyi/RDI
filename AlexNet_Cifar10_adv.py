@@ -42,5 +42,5 @@ model.eval()
 
 adv_data, labels = PGD_attack.save_pgd_attack(model=model, test_loader=train_loader, epsilon=0.01, alpha=0.001, iters=10)
 
-np.save('boundary_robustness/attackData/Cifar10/AlexNet_datas.npy', adv_data)  # save adversarial samples
-np.save('boundary_robustness/attackData/Cifar10/AlexNet_labels.npy', labels)   # save labels
+np.save('./attackData/Cifar10/AlexNet_datas.npy', adv_data)  # save adversarial samples
+np.save('./attackData/Cifar10/AlexNet_labels.npy', labels)   # save labels
