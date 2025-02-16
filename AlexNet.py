@@ -142,7 +142,7 @@ print("RDI =", RDI)
 print("Evaluating under PGD attack...")
 PGD_attack.test_with_pgd_attack(loaded_model, test_loader)
 
-# Testing model performance under Square_Attack attack
+# Testing model performance under Square attack
 # print("Evaluating under Square attack...")
 # Square_Attack.test_with_square_attack(loaded_model, test_loader)
 
