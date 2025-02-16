@@ -128,6 +128,7 @@ class_num = 10
 # Save the output of the penultimate layer of the model
 feature_vector = [[] for i in range(class_num)]
 
+# The number of loops depends on the batch size of the testing dataset, and the number of loops * batch size should be equal to the size of the whole testing dataset.
 for i in range(10):
     for j in range (len(outputs[i])):
         feature_vector[predictions[i][j][0]].append(outputs[i][j])
