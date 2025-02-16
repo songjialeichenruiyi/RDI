@@ -26,7 +26,7 @@ class ModifiedAlexNet(nn.Module):
     
     
 model = ModifiedAlexNet().to(device)
-model_save_path = 'boundary_robustness/models/cifar100/AlexNet_cifar100.pth'
+model_save_path = './models/cifar100/AlexNet_cifar100.pth'
 model.load_state_dict(torch.load(model_save_path))
 model.eval()
 
@@ -74,55 +74,53 @@ transform2 = transforms.Compose([
     transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))
 ])
 
-# 创建对抗数据集
-trainset = AdversarialDataset(adv_data_file="boundary_robustness/attackData/Cifar100/AlexNet_datas.npy", label_file="boundary_robustness/attackData/Cifar100/AlexNet_labels.npy", transform=transform)
+#  Create adversarial datasets
+trainset = AdversarialDataset(adv_data_file="./attackData/Cifar100/AlexNet_datas.npy", label_file="boundary_robustness/attackData/Cifar100/AlexNet_labels.npy", transform=transform)
 adv_train_loader = DataLoader(trainset, batch_size=64, shuffle=True)
 
-train_dataset = datasets.CIFAR100(root='./boundary_robustness/data', train=True, download=True, transform=transform3)
+train_dataset = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform3)
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
-test_dataset = datasets.CIFAR100(root='./boundary_robustness/data', train=False, download=True, transform=transform2)
+test_dataset = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform2)
 test_loader = DataLoader(test_dataset, batch_size=100, shuffle=False)
 
 
-# 混合数据加载器的生成函数
+# Hybrid Data Loader Generator Functions
 def mixed_train_loader(original_loader, adv_loader):
     """
-    从 original_loader 和 adv_loader 取全部数据组成混合批次。
+    Take all data from original_loader and adv_loader to form a mixed batch
     Args:
-        original_loader: 原始数据加载器
-        adv_loader: 对抗样本数据加载器
+        original_loader: Original Data Loader
+        adv_loader: Adversarial Data loader
     Yields:
-        mixed_images: 混合的图像张量
-        mixed_labels: 混合的标签张量
+        mixed_images:
+        mixed_labels:
     """
     for (orig_images, orig_labels), (adv_images, adv_labels) in zip(original_loader, adv_loader):
-        # 确保两边取数据量一致
+        # Ensure that both sides take the same amount of data
         min_batch_size = min(orig_images.size(0), adv_images.size(0))
 
-        # 从原始样本中取全部
+        # Take all from the original sample
         orig_images_all = orig_images[: min_batch_size]
         orig_labels_all = orig_labels[: min_batch_size]
 
-        # 从对抗样本中取全部
+        # Take all from the adversarial sample
         adv_images_all = adv_images[: min_batch_size]
         adv_labels_all = adv_labels[: min_batch_size]
 
-        # 拼接成混合批次
+        # Splicing into mixed batches
         mixed_images = torch.cat([orig_images_all, adv_images_all], dim=0)
         mixed_labels = torch.cat([orig_labels_all, adv_labels_all], dim=0)
 
         yield mixed_images, mixed_labels
 
 
-
-# 4. 训练设置
 criterion = nn.CrossEntropyLoss()
 # optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.8, weight_decay=5e-4)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  # 每2个epoch学习率衰减为原来的一半
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5) 
 
-# 训练函数
+# training function
 def adv_train(model, train_loader, adv_loader, criterion, optimizer, num_epochs):
     model.train()
     for epoch in range(num_epochs):
@@ -130,71 +128,62 @@ def adv_train(model, train_loader, adv_loader, criterion, optimizer, num_epochs)
         for mixed_images, mixed_labels in mixed_train_loader(train_loader, adv_loader):
             mixed_images, mixed_labels = mixed_images.to(device), mixed_labels.to(device)
             
-            optimizer.zero_grad()  # 清零梯度
-            outputs = model(mixed_images)  # 前向传播
-            loss = criterion(outputs, mixed_labels)  # 计算损失
-            loss.backward()  # 反向传播
-            optimizer.step()  # 更新权重
+            optimizer.zero_grad()
+            outputs = model(mixed_images)
+            loss = criterion(outputs, mixed_labels)
+            loss.backward()
+            optimizer.step()
             
             running_loss += loss.item()
 
-        # 打印每个 epoch 的损失
         print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / (len(train_loader) + len(adv_train_loader))}")
         scheduler.step()
 
-# 测试函数
+# testing function
 def test(model, test_loader):
-    model.eval()  # 设置模型为评估模式
+    model.eval()
     correct = 0
     all_outputs_before_softmax = []
     all_predictions = []
 
-    with torch.no_grad():  # 禁止计算梯度
+    with torch.no_grad():
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
-            outputs = model(images)  # 获得softmax层之前的输出
-            all_outputs_before_softmax.append(outputs.cpu().numpy())  # 保存softmax层之前的输出
+            outputs = model(images)
+            all_outputs_before_softmax.append(outputs.cpu().numpy())
             pred = outputs.argmax(dim=1, keepdim=True)
-            all_predictions.append(pred.cpu().numpy())  # 保存所有预测结果
+            all_predictions.append(pred.cpu().numpy())
             correct += pred.eq(labels.view_as(pred)).sum().item()
 
     accuracy = correct / len(test_loader.dataset)
     print(f'\nAccuracy: {correct}/{len(test_loader.dataset)} '
           f'({100. * accuracy:.2f}%)\n')
 
-    # 返回softmax层之前的输出和预测结果
     return all_outputs_before_softmax, all_predictions
 
-num_epochs = 5
-adv_train(model, train_loader, adv_train_loader, criterion, optimizer, num_epochs)
+# num_epochs = 5
+# adv_train(model, train_loader, adv_train_loader, criterion, optimizer, num_epochs)
 
-# 保存模型
 model_save_path2 = 'boundary_robustness/models/cifar100/AdvAlexNet_cifar100.pth'
-torch.save(model.state_dict(), model_save_path2)
-print(f'Model saved to {model_save_path2}')
+# torch.save(model.state_dict(), model_save_path2)
+# print(f'Model saved to {model_save_path2}')
 
 
-# 创建新的AlexNet模型实例
 loaded_model = ModifiedAlexNet().to(device)
-# 加载模型参数
 loaded_model.load_state_dict(torch.load(model_save_path2))
-loaded_model.eval()  # 切换到评估模式
+loaded_model.eval() 
 
-# 测试加载的模型
+# Test loaded models
 print("Testing loaded model...")
 outputs, predictions = test(loaded_model, test_loader)
 
 
 class_num = 100
-# 倒数第二层的输出
 feature_vector = [[] for i in range(class_num)]
 
 for i in range(100):
     for j in range (len(outputs[i])):
         feature_vector[predictions[i][j][0]].append(outputs[i][j])
-
-
-# FSA, FSD, FSC = ROBY.feature_sta(feature_vector)
-# print("FSA={}, FSD={}, FSC={}".format(FSA,FSD,FSC))
+# RDI
 RDI = RDI.features(feature_vector)
 print("RDI = ", RDI)
