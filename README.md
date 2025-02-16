@@ -22,8 +22,8 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))
 ])
-train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
-test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
+train_dataset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+test_dataset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 ```
 ### FashionMNIST
 Download and prepare the FashionMNIST dataset:
@@ -34,8 +34,8 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))
 ])
-train_dataset = datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
-test_dataset = datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform)
+train_dataset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
+test_dataset = torchvision.datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform)
 ```
 
 ### CIFAR10
@@ -45,10 +45,23 @@ import torchvision
 import torchvision.transforms as transforms
 transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,))
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.2435, 0.2616))
 ])
-train_dataset = datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
-test_dataset = datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform)
+train_dataset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+test_dataset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+```
+
+### CIFAR100
+Download and prepare the CIFAR100 dataset:
+```python
+import torchvision
+import torchvision.transforms as transforms
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.2435, 0.2616))
+])
+train_dataset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
+test_dataset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
 ```
 
 ## model_dataset.py
