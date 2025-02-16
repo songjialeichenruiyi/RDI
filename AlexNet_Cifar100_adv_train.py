@@ -75,7 +75,7 @@ transform2 = transforms.Compose([
 ])
 
 #  Create adversarial datasets
-trainset = AdversarialDataset(adv_data_file="./attackData/Cifar100/AlexNet_datas.npy", label_file="boundary_robustness/attackData/Cifar100/AlexNet_labels.npy", transform=transform)
+trainset = AdversarialDataset(adv_data_file="./attackData/Cifar100/AlexNet_datas.npy", label_file="./attackData/Cifar100/AlexNet_labels.npy", transform=transform)
 adv_train_loader = DataLoader(trainset, batch_size=64, shuffle=True)
 
 train_dataset = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform3)
