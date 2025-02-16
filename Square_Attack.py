@@ -3,26 +3,24 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-import torchattacks  # 引入 torchattacks 库
+import torchattacks 
 import os
 from torchvision.transforms import ToPILImage
 import matplotlib.pyplot as plt
 
-# 检查是否有可用的GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# 使用Square Attack测试模型的性能
+# Testing the performance of a model using Square Attack
 def test_with_square_attack(model, test_loader, norm='Linf', n_queries=5000, eps=0.3):
     model.eval()
     
-    attacks = torchattacks.Square(model, norm=norm, eps=eps, n_queries=n_queries)  # 初始化Square Attack
-
+    attacks = torchattacks.Square(model, norm=norm, eps=eps, n_queries=n_queries) 
     correct = 0
     total = 0
 
     for images, labels in test_loader:
         images, labels = images.to(device), labels.to(device)
-        adv_images = attacks(images, labels)  # 生成对抗样本
+        adv_images = attacks(images, labels) 
         outputs = model(adv_images)
         
         _, predicted = torch.max(outputs, 1)
