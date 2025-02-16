@@ -67,13 +67,16 @@ test_dataset = torchvision.datasets.CIFAR100(root='./data', train=False, downloa
 Download the ImageNet dataset from the following link: [Tiny-ImageNet](http://cs231n.stanford.edu/tiny-imagenet-200.zip)
 
 ## Explanation of the functionality of the different codes
-### model_dataset.py ()
-Code for training different models with natural samples.
-## model_dataset_adv.py
-Use PGD attack method to generate dversarial samples under different models and different data sets.
+### model_dataset.py
+Codes for training and testing different models with natural samples, such as **AlexNet_Cifar10.py, AlexNet.py, etc.** Where the naming scheme of ALexNet.py, there is no dataset after the model to indicate that the MNIST dataset is used, and the naming scheme of the following codes is the same.
+### model_dataset_adv.py
+Use PGD attack method to generate dversarial samples under different models and different datasets, such as **AlexNet_Cifar10_adv.py, AlexNet_adv.py, etc.**
 ## model_dataset_adv_train.py
-Code for adversarial training using adversarial examples.
-## PGD_attack.py RFGSM.py Square_Attack.py
+Codes for adversarial training using adversarial examples, such as **AlexNet_Cifar10_adv_train.py, AlexNet_adv_train.py, etc.**
+## PGD_attack.py, RFGSM.py, Square_Attack.py
 Codes for three attack methods.
 ## RDI.py
-The code of the RDI calculation method needs to pass in the feature vectors, and the feature vectors extraction is placed in the code of each model training.
+The code of the RDI calculation method needs to pass in the feature vectors, and the feature vectors extraction is placed in the codes of each model training (**model_dataset.py and model_dataset_adv_train.py**).
+
+## Usage
+After preparing the dataset and the corresponding model (the model structure needs to be the same as the one in the codes), modify the paths for the model and dataset in **model_dataset.py and model_dataset_adv_train.py**, then run the codes directly to obtain the model's RDI value. By adjusting the comments in both types of codes, you can also perform model training.
