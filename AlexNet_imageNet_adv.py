@@ -35,7 +35,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.4802, 0.4481, 0.3975), (0.2302, 0.2265, 0.2262)) 
 ])
 
-dataset_path = "./boundary_robustness/data/tiny-imagenet-200"
+dataset_path = "./data/tiny-imagenet-200"
 train_dir = os.path.join(dataset_path, 'train')
 val_dir = os.path.join(dataset_path, 'val')
 
