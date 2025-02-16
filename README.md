@@ -58,11 +58,15 @@ import torchvision
 import torchvision.transforms as transforms
 transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.2435, 0.2616))
+    transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))
 ])
 train_dataset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
 test_dataset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
 ```
+### Tiny-ImageNet
+Download the ImageNet dataset from the following link: [Tiny-ImageNet](http://cs231n.stanford.edu/tiny-imagenet-200.zip)
+
+## Explanation of the functionality of the different codes
 
 ## model_dataset.py
 Code for training different models with natural samples.
