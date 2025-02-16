@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets, transforms, models
-# import ROBY
 import RDI
 import PGD_attack
 import Square_Attack
@@ -12,42 +11,35 @@ import numpy as np
 import os
 from PIL import Image
 
-# 检查是否有可用的GPU
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(torch.cuda.is_available())
 
-# 加载 torchvision.models 中的 AlexNet 模型，并修改输入层以适应TinyImageNet数据集
 class ModifiedAlexNet(nn.Module):
-    def __init__(self, num_classes=200):  # 将类别数量改为 200
+    def __init__(self, num_classes=200): 
         super(ModifiedAlexNet, self).__init__()
         self.model = models.alexnet(weights = None)
-        # 修改第一层卷积来适应小尺寸输入
         # self.model.features[0] = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
-        # 修改最大池化层，减少池化窗口的大小和步幅
         # self.model.features[2] = nn.Identity()
-        self.model.classifier[6] = nn.Linear(4096, num_classes)  # 修改输出层以适应Tiny-imageNet200的类别数量
+        self.model.classifier[6] = nn.Linear(4096, num_classes)
 
     def forward(self, x):
         return self.model(x)
 
     
 
-# 数据预处理：转换为 Tensor 并进行归一化
+
 transform = transforms.Compose([
-    # transforms.RandomHorizontalFlip(),  # 随机水平翻转
-    # transforms.RandomRotation(10),      # 随机旋转角度
-    # transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), # 色彩抖动
-    # 改变图像大小
     transforms.Resize((224, 224)),  
     transforms.ToTensor(),
-    transforms.Normalize((0.4802, 0.4481, 0.3975), (0.2302, 0.2265, 0.2262))  # Tiny-imageNet200的均值和标准差
+    transforms.Normalize((0.4802, 0.4481, 0.3975), (0.2302, 0.2265, 0.2262)) 
 ])
 
 dataset_path = "./boundary_robustness/data/tiny-imagenet-200"
 train_dir = os.path.join(dataset_path, 'train')
 val_dir = os.path.join(dataset_path, 'val')
 
-# 自定义验证集数据集类
+# Custom validation dataset
 class TinyImageNetValDataset(Dataset):
     def __init__(self, val_dir, transform=None):
         self.val_dir = val_dir
