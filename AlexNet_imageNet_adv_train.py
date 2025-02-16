@@ -78,7 +78,7 @@ trainset = AdversarialDataset(adv_data_file="./attackData/ImageNet/AlexNet_datas
 adv_train_loader = DataLoader(trainset, batch_size=64, shuffle=True, num_workers=4)
 
 
-dataset_path = "./boundary_robustness/data/tiny-imagenet-200"
+dataset_path = "./data/tiny-imagenet-200"
 train_dir = os.path.join(dataset_path, 'train')
 val_dir = os.path.join(dataset_path, 'val')
 
