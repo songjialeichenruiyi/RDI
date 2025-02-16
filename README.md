@@ -1,4 +1,13 @@
 # RDI: A adversarial robustness evaluation metric for deep neural networks based on model statistical features
+## Overview
+RDI is a adversarial robustness evaluation metric for deep neural networks based on model statistical features. This README provides an explanation of the functionality of the different codes in the repository and how to set up and run the method.
+## Requirements
+- **Python**: 3.9.0
+- **Libraries**:
+  - PyTorch 1.13.0
+  - Torchvision 0.14.0
+
+
 ## model_dataset.py
 Code for training different models with natural samples.
 ## model_dataset_adv.py
