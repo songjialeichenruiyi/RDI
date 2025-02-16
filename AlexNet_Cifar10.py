@@ -87,7 +87,6 @@ def test(model, test_loader):
 # num_epochs = 15
 # train(model, train_loader, criterion, optimizer, num_epochs)
 
-# 保存模型
 model_save_path = 'boundary_robustness/models/cifar10/AlexNet_cifar10.pth'
 # torch.save(model.state_dict(), model_save_path)
 # print(f'Model saved to {model_save_path}')
