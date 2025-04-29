@@ -14,12 +14,9 @@ import gauss
 import CW_attack
 import SirenAttack
 
-# 检查是否有可用的GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(f"使用设备: {device}")
-print(f"CUDA可用: {torch.cuda.is_available()}")
 
-# 定义数据集类，这里使用SpeechCommands数据集
+# Define the dataset class, here using the SpeechCommands dataset
 class SubsetSC(SPEECHCOMMANDS):
     def __init__(self, subset: str = None):
         super().__init__("./boundary_robustness/data", download=True)
@@ -38,13 +35,12 @@ class SubsetSC(SPEECHCOMMANDS):
             excludes = set(excludes)
             self._walker = [w for w in self._walker if w not in excludes]
 
-# 只选择10个类别
+# Only 10 categories will be selected
 labels = ['yes', 'no', 'up', 'down', 'left', 'right', 'on', 'off', 'stop', 'go']
 
-# 标签映射
 label_map = {label: i for i, label in enumerate(labels)}
 
-# 创建音频预处理转换器
+# Create an audio pre-processing converter
 melspec = MelSpectrogram(
     sample_rate=16000,
     n_fft=1024,
@@ -53,66 +49,51 @@ melspec = MelSpectrogram(
 )
 amplitude_to_db = torchaudio.transforms.AmplitudeToDB()
 
-# 预处理音频并提取特征 - 在CPU上完成
+# Preprocess audio and extract features
 def extract_features(waveform):
-    """提取梅尔频谱图特征"""
-    # 确保音频长度一致 (调整到1秒)
+    """Extract Mel spectrogram features"""
     if waveform.shape[1] < 16000:
-        # 填充音频
         padding = torch.zeros(1, 16000 - waveform.shape[1])
         waveform = torch.cat([waveform, padding], dim=1)
     else:
-        # 截断音频
         waveform = waveform[:, :16000]
     
-    # 提取特征
     with torch.no_grad():
-        # 转换为梅尔频谱图
         spec = melspec(waveform)
-        # 转换为分贝单位
         spec_db = amplitude_to_db(spec)
-        # 添加通道维度
-        spec_db = spec_db.unsqueeze(0)  # 形状: [1, n_mels, time]
+        spec_db = spec_db.unsqueeze(0)
     
     return spec_db
 
-# 自定义数据收集函数 - 预先提取特征，避免在GPU上进行特征提取
 def collate_fn(batch):
     features = []
     labels = []
     for waveform, sample_rate, label, speaker_id, utterance_number in batch:
-        # 只处理目标类别
         if label in label_map:
-            # 在CPU上提取特征
             feature = extract_features(waveform)
             features.append(feature)
             labels.append(label_map[label])
     
-    # 如果批次为空，返回空张量
     if len(features) == 0:
         return torch.empty(0), torch.empty(0, dtype=torch.long)
     
-    # 转换为tensor
-    features = torch.cat(features, dim=0)  # 形状: [batch_size, 1, n_mels, time]
+    features = torch.cat(features, dim=0)
     labels = torch.tensor(labels, dtype=torch.long)
     return features, labels
 
-# 加载数据集
 train_dataset = SubsetSC("training")
 test_dataset = SubsetSC("testing")
 val_dataset = SubsetSC("validation")
 
-# 批次大小
 batch_size = 64
 
-# 加载训练集和测试集
 train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
     shuffle=True,
     collate_fn=collate_fn,
     pin_memory=True if torch.cuda.is_available() else False,
-    num_workers=4  # 使用多个工作进程加速数据加载
+    num_workers=4
 )
 
 test_loader = DataLoader(
@@ -124,8 +105,6 @@ test_loader = DataLoader(
     num_workers=4
 )
 
-
-# 选项4: Enhanced M5 - 增强版的M5模型，添加注意力机制
 class EnhancedM5(nn.Module):
     def __init__(self, n_input=1, n_output=10, stride=16, n_channel=64):
         super().__init__()
@@ -136,7 +115,6 @@ class EnhancedM5(nn.Module):
         self.bn2 = nn.BatchNorm2d(n_channel)
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         
-        # 后续卷积层
         self.conv3 = nn.Conv2d(n_channel, 2 * n_channel, kernel_size=3, stride=1, padding=1)
         self.bn3 = nn.BatchNorm2d(2 * n_channel)
         self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -144,7 +122,6 @@ class EnhancedM5(nn.Module):
         self.bn4 = nn.BatchNorm2d(2 * n_channel)
         self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
         
-        # 注意力机制 - 通道注意力
         self.channel_attention = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(2 * n_channel, 2 * n_channel // 8, kernel_size=1),
@@ -153,10 +130,8 @@ class EnhancedM5(nn.Module):
             nn.Sigmoid()
         )
         
-        # 自适应池化
         self.adaptive_pool = nn.AdaptiveAvgPool2d(output_size=1)
         
-        # 全连接层
         self.fc1 = nn.Linear(2 * n_channel, n_output)
         
     def forward(self, x):
@@ -173,17 +148,13 @@ class EnhancedM5(nn.Module):
         x = nn.functional.relu(self.bn4(x))
         x = self.pool4(x)
         
-        # 应用通道注意力
         attn = self.channel_attention(x)
         x = x * attn
         
-        # 自适应池化到固定大小
         x = self.adaptive_pool(x)
         
-        # 展平
         x = x.view(x.size(0), -1)
         
-        # 全连接层
         x = self.fc1(x)
         return x
 
@@ -192,10 +163,9 @@ model = EnhancedM5(n_input=1, n_output=len(labels)).to(device)
 criterion = nn.CrossEntropyLoss()
 # optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
 optimizer = optim.Adam(model.parameters(), lr=0.001,weight_decay=1e-4)
-# 学习率调度器 - 帮助模型更好地收敛
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
-# 训练函数
+# train model
 def train(model, train_loader, criterion, optimizer, scheduler, num_epochs):
     best_accuracy = 0.0
     
@@ -206,82 +176,73 @@ def train(model, train_loader, criterion, optimizer, scheduler, num_epochs):
         running_loss = 0.0
         
         for features, labels in train_loader:
-            # 跳过空批次
+        
             if features.size(0) == 0:
                 continue
                 
             features, labels = features.to(device), labels.to(device)
             
-            optimizer.zero_grad()  # 清零梯度
-            outputs = model(features)  # 前向传播
+            optimizer.zero_grad()
+            outputs = model(features)  
             pred = outputs.argmax(dim=1, keepdim=True)
             correct += pred.eq(labels.view_as(pred)).sum().item()
             total += labels.size(0)
-            loss = criterion(outputs, labels)  # 计算损失
-            loss.backward()  # 反向传播
-            optimizer.step()  # 更新权重
+            loss = criterion(outputs, labels) 
+            loss.backward() 
+            optimizer.step() 
             
             running_loss += loss.item()
         
-        # 更新学习率
         scheduler.step()
         
-        if total > 0:  # 避免除零错误
+        if total > 0:  
             accuracy = correct / total
-            print(f'训练准确率: {correct}/{total} ({100. * accuracy:.2f}%)')
+            print(f'train Acc: {correct}/{total} ({100. * accuracy:.2f}%)')
             print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / len(train_loader)}")
             
 
-# 测试函数
+# test model
 def test(model, test_loader):
-    model.eval()  # 设置模型为评估模式
+    model.eval()
     correct = 0
     total = 0
     all_outputs_before_softmax = []
     all_predictions = []
     
-    with torch.no_grad():  # 禁止计算梯度
+    with torch.no_grad():  
         for features, labels in test_loader:
-            # 跳过空批次
             if features.size(0) == 0:
                 continue
                 
             features, labels = features.to(device), labels.to(device)
             outputs = model(features)
-            all_outputs_before_softmax.append(outputs.cpu().numpy())  # 保存softmax层之前的输出
+            all_outputs_before_softmax.append(outputs.cpu().numpy()) 
             pred = outputs.argmax(dim=1, keepdim=True)
-            all_predictions.append(pred.cpu().numpy())  # 保存所有预测结果
+            all_predictions.append(pred.cpu().numpy()) 
             correct += pred.eq(labels.view_as(pred)).sum().item()
             total += labels.size(0)
     
     accuracy = 0
-    if total > 0:  # 避免除零错误
+    if total > 0:  
         accuracy = correct / total
-        print(f'\n测试准确率: {correct}/{total} ({100. * accuracy:.2f}%)\n')
-    
-    # 返回softmax层之前的输出和预测结果
+        print(f'\ntest acc: {correct}/{total} ({100. * accuracy:.2f}%)\n')
+
     return all_outputs_before_softmax, all_predictions, accuracy
 
-# 训练模型
 num_epochs = 5
 train(model, train_loader, criterion, optimizer, scheduler, num_epochs)
 
-# 保存最终模型
 model_save_path = './boundary_robustness/models/speech/speech_enhancedM5_10class.pth'
 torch.save(model.state_dict(), model_save_path)
-print(f'最终模型已保存到 {model_save_path}')
+print(f'The final model has been saved to {model_save_path}')
 
-# 加载模型并测试
-print("加载最佳模型...")
-best_model = EnhancedM5().to(device)  # 确保与训练的模型架构一致
+best_model = EnhancedM5().to(device)
 best_model.load_state_dict(torch.load(model_save_path))
 best_model.eval()
 
-print("测试最佳模型...")
 outputs, predictions, acc = test(best_model, test_loader)
 
 class_num = len(labels)
-# 倒数第二层的输出
 feature_vector = [[] for i in range(class_num)]
 
 for i in range(len(outputs)):
