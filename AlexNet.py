@@ -8,6 +8,7 @@ import PGD_attack
 import PGD_attack2
 import Square_Attack
 import RFGSM
+import CW_attack
 import time
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
