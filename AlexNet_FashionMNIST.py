@@ -8,6 +8,7 @@ import PGD_attack
 import PGD_attack2
 import Square_Attack
 import RFGSM
+import CW_attack
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(torch.cuda.is_available())
@@ -132,11 +133,15 @@ print("Evaluating under PGD attack...")
 PGD_attack.test_with_pgd_attack(loaded_model, test_loader)
 
 
-# Testing model performance under RFGSM attacks
+# Testing model performance under RFGSM attack
 # print("Evaluating under RFGSM attack...")
 # RFGSM.test_with_RFGSM_attack(loaded_model, test_loader)
 
-# Testing model performance under Square attack attacks
+# Testing model performance under Square attack
 # print("Evaluating under Square attack...")
 # Square_Attack.test_with_square_attack(loaded_model, test_loader)
+
+# Testing model performance under CW attack
+# print("Evaluating under CW attack...")
+# CW_attack.test_with_cw_attack(loaded_model, test_loader, 1, 0.01, 50)
 
