@@ -11,7 +11,7 @@ import PGD_attack2
 import RFGSM
 import Square_Attack
 import time
-
+import CW_attack
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 class ResNet101(nn.Module):
@@ -126,3 +126,7 @@ PGD_attack.test_with_pgd_attack(loaded_model, test_loader)
 # Testing model performance under Square attack
 # print("Evaluating under Square attack...")
 # Square_Attack.test_with_square_attack(loaded_model, test_loader)
+
+# Testing model performance under CW attack
+# print("Evaluating under CW attack...")
+# CW_attack.test_with_cw_attack(loaded_model, test_loader, 1, 0.01, 50)
