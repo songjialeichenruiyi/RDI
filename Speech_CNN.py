@@ -192,7 +192,7 @@ def train(model, train_loader, criterion, optimizer, scheduler, num_epochs):
         
         if total > 0:  
             accuracy = correct / total
-            print(f'训练准确率: {correct}/{total} ({100. * accuracy:.2f}%)')
+            print(f'train acc: {correct}/{total} ({100. * accuracy:.2f}%)')
             print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / len(train_loader)}")
             
 
@@ -219,7 +219,7 @@ def test(model, test_loader):
     accuracy = 0
     if total > 0:  
         accuracy = correct / total
-        print(f'\n测试准确率: {correct}/{total} ({100. * accuracy:.2f}%)\n')
+        print(f'\ntest acc: {correct}/{total} ({100. * accuracy:.2f}%)\n')
     
     return all_outputs_before_softmax, all_predictions, accuracy
 
