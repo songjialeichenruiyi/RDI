@@ -67,7 +67,7 @@ test_dataset = torchvision.datasets.CIFAR100(root='./data', train=False, downloa
 Download the ImageNet dataset from the following link: [Tiny-ImageNet](http://cs231n.stanford.edu/tiny-imagenet-200.zip)
 
 ### SpeechCommand
-
+The dataset needs to be loaded and preprocessed. Detailed procedures can be found in the data processing section of Speech_XX.py.
 
 
 ## Explanation of the functionality of the different codes
