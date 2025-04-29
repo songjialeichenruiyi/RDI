@@ -63,6 +63,7 @@ transform = transforms.Compose([
 train_dataset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
 test_dataset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
 ```
+
 ### Tiny-ImageNet
 Download the ImageNet dataset from the following link: [Tiny-ImageNet](http://cs231n.stanford.edu/tiny-imagenet-200.zip)
 
@@ -77,8 +78,8 @@ The codes for training and testing different models using natural samples is pro
 Use PGD attack method to generate dversarial samples under different models and different datasets, such as **AlexNet_Cifar10_adv.py, AlexNet_adv.py, etc.**
 ## model_dataset_adv_train.py
 Codes for adversarial training using adversarial examples, such as **AlexNet_Cifar10_adv_train.py, AlexNet_adv_train.py, etc.**
-## PGD_attack.py, RFGSM.py, Square_Attack.py
-Codes for three attack methods.
+## PGD_attack.py, RFGSM.py, Square_Attack.py, CW_attack.py, SirenAttack.py
+Codes for five attack methods. SirenAttack is an attack method that targets language recognition models.
 ## RDI.py
 The code of the RDI calculation method needs to pass in the feature vectors, and the feature vectors extraction is placed in the codes of each model training (**model_dataset.py and model_dataset_adv_train.py**).
 
