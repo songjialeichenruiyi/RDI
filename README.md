@@ -72,7 +72,7 @@ The dataset needs to be loaded and preprocessed. Detailed procedures can be foun
 
 ## Explanation of the functionality of the different codes
 ### model_dataset.py
-Codes for training and testing different models with natural samples, such as **AlexNet_Cifar10.py, AlexNet.py, etc.** Where the naming scheme of ALexNet.py, there is no dataset after the model to indicate that the MNIST dataset is used, and the naming scheme of the following codes is the same.
+The codes for training and testing different models using natural samples is provided, such as **AlexNet_Cifar10.py, AlexNet.py, and Speech_CNN.py**. In the naming convention, a filename like AlexNet.py without a dataset name indicates that the model is trained on the MNIST dataset. Files prefixed with Speech, such as Speech_CNN.py, correspond to models using the SpeechCommand speech recognition dataset. The same naming scheme is followed throughout the remaining code.
 ### model_dataset_adv.py
 Use PGD attack method to generate dversarial samples under different models and different datasets, such as **AlexNet_Cifar10_adv.py, AlexNet_adv.py, etc.**
 ## model_dataset_adv_train.py
