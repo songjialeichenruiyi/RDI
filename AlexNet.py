@@ -149,3 +149,7 @@ PGD_attack.test_with_pgd_attack(loaded_model, test_loader)
 # Testing model performance under RFGSM attack
 # print("Evaluating under RFGSM attack...")
 # RFGSM.test_with_RFGSM_attack(loaded_model, test_loader)
+
+# Testing model performance under CW attack
+# print("Evaluating under CW attack...")
+# CW_attack.test_with_cw_attack(loaded_model, test_loader, 1, 0.01, 50)
