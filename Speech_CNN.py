@@ -6,7 +6,6 @@ import torchaudio
 from torchaudio.datasets import SPEECHCOMMANDS
 from torchaudio.transforms import MelSpectrogram, Resample
 import os
-import ROBY
 import RDI
 import SirenAttack
 
@@ -288,9 +287,6 @@ for i in range(len(outputs)):
     for j in range(len(outputs[i])):
         pred_class = predictions[i][j][0]
         feature_vector[pred_class].append(outputs[i][j])
-
-FSC = ROBY.feature_sta(feature_vector)
-print("FSC = {}".format(FSC))
 
 RDI = RDI.features(feature_vector)
 print("RDI = ", RDI)
