@@ -1,4 +1,4 @@
-# RDI: A adversarial robustness evaluation metric for deep neural networks based on model statistical features
+# RDI: An adversarial robustness evaluation metric for deep neural networks based on sample clustering features
 ## Overview
 RDI is a adversarial robustness evaluation metric for deep neural networks based on model statistical features. This README provides an explanation of the functionality of the different codes in the repository and how to set up and run the method.
 ## Requirements
@@ -65,6 +65,10 @@ test_dataset = torchvision.datasets.CIFAR100(root='./data', train=False, downloa
 ```
 ### Tiny-ImageNet
 Download the ImageNet dataset from the following link: [Tiny-ImageNet](http://cs231n.stanford.edu/tiny-imagenet-200.zip)
+
+### SpeechCommand
+
+
 
 ## Explanation of the functionality of the different codes
 ### model_dataset.py
